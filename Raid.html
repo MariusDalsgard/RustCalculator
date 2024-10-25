@@ -38,7 +38,7 @@
       margin-bottom: 20px;
     }
     /* Explosive Selector */
-    .explosive-select {
+    .explosive-select, .sulfur-input {
       width: 100%;
       padding: 10px;
       margin-bottom: 15px;
@@ -86,6 +86,7 @@
       font-size: 1em;
       font-weight: bold;
       cursor: pointer;
+      margin-top: 5px;
       transition: background-color 0.3s;
     }
     button:hover {
@@ -109,43 +110,66 @@
       font-size: 0.8em;
       color: #888;
     }
+    /* Additional Box Styling for Separate Sections */
+    .raid-box, .production-box {
+      background-color: #2a2a3e;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+    .raid-box h3, .production-box h3 {
+      color: #76c7c0;
+      font-size: 1.3em;
+      margin-bottom: 10px;
+    }
   </style>
 </head>
 <body>
   <div class="calculator">
     <h2>Rust Raid Calculator</h2>
     
-    <!-- Explosive Selector at the Top -->
-    <select class="explosive-select" id="explosiveType">
-      <option value="satchels">Satchels</option>
-      <option value="c4">C4</option>
-      <option value="rockets">Rockets</option>
-      <option value="explosiveAmmo">Explosive Ammo</option>
-    </select>
-    
-    <div class="box input-container">
-      <h3>Walls</h3>
-      <label>Wood Walls: <input type="number" id="wood" min="0" value="0"></label>
-      <label>Stone Walls: <input type="number" id="stone" min="0" value="0"></label>
-      <label>Metal Walls: <input type="number" id="metal" min="0" value="0"></label>
-      <label>Armored Walls: <input type="number" id="armored" min="0" value="0"></label>
+    <div class="raid-box">
+      <h3>Calculate Raid</h3>
+      <select class="explosive-select" id="explosiveType">
+        <option value="satchels">Satchels</option>
+        <option value="c4">C4</option>
+        <option value="rockets">Rockets</option>
+        <option value="explosiveAmmo">Explosive Ammo</option>
+      </select>
+      
+      <div class="box input-container">
+        <h3>Walls</h3>
+        <label>Wood Walls: <input type="number" id="wood" min="0" value="0"></label>
+        <label>Stone Walls: <input type="number" id="stone" min="0" value="0"></label>
+        <label>Metal Walls: <input type="number" id="metal" min="0" value="0"></label>
+        <label>Armored Walls: <input type="number" id="armored" min="0" value="0"></label>
+      </div>
+      
+      <div class="box input-container">
+        <h3>Doors</h3>
+        <label>Wood Doors: <input type="number" id="woodDoor" min="0" value="0"></label>
+        <label>Sheet Metal Doors: <input type="number" id="sheetMetalDoor" min="0" value="0"></label>
+        <label>Garage Doors: <input type="number" id="garageDoor" min="0" value="0"></label>
+        <label>Armored Doors: <input type="number" id="armoredDoor" min="0" value="0"></label>
+      </div>
+      
+      <button onclick="calculateRaid()">Calculate Raid</button>
     </div>
-    
-    <div class="box input-container">
-      <h3>Doors</h3>
-      <label>Wood Doors: <input type="number" id="woodDoor" min="0" value="0"></label>
-      <label>Sheet Metal Doors: <input type="number" id="sheetMetalDoor" min="0" value="0"></label>
-      <label>Garage Doors: <input type="number" id="garageDoor" min="0" value="0"></label>
-      <label>Armored Doors: <input type="number" id="armoredDoor" min="0" value="0"></label>
+
+    <div class="production-box">
+      <h3>Calculate Production</h3>
+      <input type="number" class="sulfur-input" id="sulfurAmount" placeholder="Enter Sulfur Amount">
+      <button onclick="calculateProduction()">Calculate Production</button>
     </div>
-    
-    <button onclick="calculateRaid()">Calculate</button>
+
     <div class="results" id="results"></div>
     <!-- Footer Text -->
     <p class="footer-text">Lavet af sigmaen Marius</p>
   </div>
 
   <script>
+    const sulfurCosts = { satchels: 480, c4: 2200, rockets: 1400, explosiveAmmo: 30 };
+
     function calculateRaid() {
       const quantities = {
         wood: parseInt(document.getElementById("wood").value) || 0,
@@ -169,9 +193,7 @@
         garageDoor: { satchels: 9, c4: 2, rockets: 3, explosiveAmmo: 150 },
         armoredDoor: { satchels: 12, c4: 3, rockets: 5, explosiveAmmo: 200 }
       };
-      const sulfurCosts = { satchels: 480, c4: 2200, rockets: 1400, explosiveAmmo: 15 };
 
-      // Separate calculations for walls and doors
       let wallResources = 0;
       let doorResources = 0;
 
@@ -185,13 +207,31 @@
       const totalResources = wallResources + doorResources;
       const totalSulfur = totalResources * sulfurCosts[explosiveType];
 
-      // Display results with separate rows for walls and doors
       document.getElementById("results").innerHTML = `
-        <p><strong>Walls (${explosiveType.charAt(0).toUpperCase() + explosiveType.slice(1)}):</strong> ${wallResources}</p>
-        <p><strong>Doors (${explosiveType.charAt(0).toUpperCase() + explosiveType.slice(1)}):</strong> ${doorResources}</p>
+        <p><strong>Walls (${explosiveType}):</strong> ${wallResources}</p>
+        <p><strong>Doors (${explosiveType}):</strong> ${doorResources}</p>
         <hr>
-        <p><strong>Total ${explosiveType.charAt(0).toUpperCase() + explosiveType.slice(1)} Needed:</strong> ${totalResources}</p>
+        <p><strong>Total ${explosiveType} Needed:</strong> ${totalResources}</p>
         <p><strong>Total Sulfur Required:</strong> ${totalSulfur}</p>
+      `;
+    }
+
+    function calculateProduction() {
+      const sulfurAmount = parseInt(document.getElementById("sulfurAmount").value) || 0;
+      const explosiveProduction = {
+        satchels: Math.floor(sulfurAmount / sulfurCosts.satchels),
+        c4: Math.floor(sulfurAmount / sulfurCosts.c4),
+        rockets: Math.floor(sulfurAmount / sulfurCosts.rockets),
+        explosiveAmmo: Math.floor(sulfurAmount / sulfurCosts.explosiveAmmo)
+      };
+
+      document.getElementById("results").innerHTML += `
+        <hr>
+        <p><strong>With ${sulfurAmount} Sulfur, you can produce:</strong></p>
+        <p>Satchels: ${explosiveProduction.satchels}</p>
+        <p>C4: ${explosiveProduction.c4}</p>
+        <p>Rockets: ${explosiveProduction.rockets}</p>
+        <p>Explosive Ammo: ${explosiveProduction.explosiveAmmo}</p>
       `;
     }
   </script>
