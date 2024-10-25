@@ -36,9 +36,15 @@
       font-size: 1.6em;
       margin-bottom: 20px;
     }
-    /* Input Container */
-    .input-container {
+    /* Explosive Selector */
+    .explosive-select {
+      width: 100%;
+      padding: 10px;
       margin-bottom: 15px;
+      border: none;
+      border-radius: 5px;
+      background-color: #222;
+      color: #fff;
     }
     /* Box Container for Walls and Doors */
     .box {
@@ -100,6 +106,15 @@
 <body>
   <div class="calculator">
     <h2>Rust Raid Calculator</h2>
+    
+    <!-- Explosive Selector at the Top -->
+    <select class="explosive-select" id="explosiveType">
+      <option value="satchels">Satchels</option>
+      <option value="c4">C4</option>
+      <option value="rockets">Rockets</option>
+      <option value="explosiveAmmo">Explosive Ammo</option>
+    </select>
+    
     <div class="box input-container">
       <h3>Walls</h3>
       <label>Wood Walls: <input type="number" id="wood" min="0" value="0"></label>
@@ -107,6 +122,7 @@
       <label>Metal Walls: <input type="number" id="metal" min="0" value="0"></label>
       <label>Armored Walls: <input type="number" id="armored" min="0" value="0"></label>
     </div>
+    
     <div class="box input-container">
       <h3>Doors</h3>
       <label>Wood Doors: <input type="number" id="woodDoor" min="0" value="0"></label>
@@ -114,6 +130,7 @@
       <label>Garage Doors: <input type="number" id="garageDoor" min="0" value="0"></label>
       <label>Armored Doors: <input type="number" id="armoredDoor" min="0" value="0"></label>
     </div>
+    
     <button onclick="calculateRaid()">Calculate</button>
     <div class="results" id="results"></div>
   </div>
@@ -131,62 +148,41 @@
       const garageDoorQty = parseInt(document.getElementById("garageDoor").value) || 0;
       const armoredDoorQty = parseInt(document.getElementById("armoredDoor").value) || 0;
 
+      const explosiveType = document.getElementById("explosiveType").value;
       // Raid requirements for each structure
+
       const requirements = {
         woodWall: { satchels: 2, c4: 1, rockets: 1, explosiveAmmo: 50 },
         stoneWall: { satchels: 10, c4: 2, rockets: 2, explosiveAmmo: 200 },
         metalWall: { satchels: 23, c4: 4, rockets: 4, explosiveAmmo: 400 },
         armoredWall: { satchels: 46, c4: 8, rockets: 8, explosiveAmmo: 800 },
-
         woodDoor: { satchels: 1, c4: 1, rockets: 1, explosiveAmmo: 25 },
         sheetMetalDoor: { satchels: 4, c4: 1, rockets: 1, explosiveAmmo: 63 },
         garageDoor: { satchels: 9, c4: 2, rockets: 3, explosiveAmmo: 150 },
         armoredDoor: { satchels: 12, c4: 2, rockets: 2, explosiveAmmo: 200 }
       };
 
-      const sulfurCosts = { satchel: 480, c4: 2200, rocket: 1400, explosiveAmmo: 15 };
+      // Corrected sulfurCosts keys to match explosiveType values
+      const sulfurCosts = { satchels: 480, c4: 2200, rockets: 1400, explosiveAmmo: 15 };
 
       function calcResources(qty, reqs) {
-        return {
-          satchels: qty * reqs.satchels,
-          c4: qty * reqs.c4,
-          rockets: qty * reqs.rockets,
-          explosiveAmmo: qty * reqs.explosiveAmmo
-        };
+        return reqs[explosiveType] * qty;
       }
-
       // Calculate resources for each structure
-      const woodWallResources = calcResources(woodQty, requirements.woodWall);
-      const stoneWallResources = calcResources(stoneQty, requirements.stoneWall);
-      const metalWallResources = calcResources(metalQty, requirements.metalWall);
-      const armoredWallResources = calcResources(armoredQty, requirements.armoredWall);
-
-      const woodDoorResources = calcResources(woodDoorQty, requirements.woodDoor);
-      const sheetMetalDoorResources = calcResources(sheetMetalDoorQty, requirements.sheetMetalDoor);
-      const garageDoorResources = calcResources(garageDoorQty, requirements.garageDoor);
-      const armoredDoorResources = calcResources(armoredDoorQty, requirements.armoredDoor);
-
+      const totalResources =
+        calcResources(woodQty, requirements.woodWall) +
+        calcResources(stoneQty, requirements.stoneWall) +
+        calcResources(metalQty, requirements.metalWall) +
+        calcResources(armoredQty, requirements.armoredWall) +
+        calcResources(woodDoorQty, requirements.woodDoor) +
+        calcResources(sheetMetalDoorQty, requirements.sheetMetalDoor) +
+        calcResources(garageDoorQty, requirements.garageDoor) +
+        calcResources(armoredDoorQty, requirements.armoredDoor);
       // Total resources for all structures
-      const totalSatchels = woodWallResources.satchels + stoneWallResources.satchels + metalWallResources.satchels + armoredWallResources.satchels +
-                            woodDoorResources.satchels + sheetMetalDoorResources.satchels + garageDoorResources.satchels + armoredDoorResources.satchels;
-
-      const totalC4 = woodWallResources.c4 + stoneWallResources.c4 + metalWallResources.c4 + armoredWallResources.c4 +
-                      woodDoorResources.c4 + sheetMetalDoorResources.c4 + garageDoorResources.c4 + armoredDoorResources.c4;
-
-      const totalRockets = woodWallResources.rockets + stoneWallResources.rockets + metalWallResources.rockets + armoredWallResources.rockets +
-                           woodDoorResources.rockets + sheetMetalDoorResources.rockets + garageDoorResources.rockets + armoredDoorResources.rockets;
-
-      const totalExplosiveAmmo = woodWallResources.explosiveAmmo + stoneWallResources.explosiveAmmo + metalWallResources.explosiveAmmo + armoredWallResources.explosiveAmmo +
-                                 woodDoorResources.explosiveAmmo + sheetMetalDoorResources.explosiveAmmo + garageDoorResources.explosiveAmmo + armoredDoorResources.explosiveAmmo;
-
-      const totalSulfur = (totalSatchels * sulfurCosts.satchel) + (totalC4 * sulfurCosts.c4) + (totalRockets * sulfurCosts.rocket) + (totalExplosiveAmmo * sulfurCosts.explosiveAmmo);
+      const totalSulfur = totalResources * sulfurCosts[explosiveType];
 
       document.getElementById("results").innerHTML = `
-        <p><strong>Total Resources Needed:</strong></p>
-        <p>- Satchels: ${totalSatchels}</p>
-        <p>- C4: ${totalC4}</p>
-        <p>- Rockets: ${totalRockets}</p>
-        <p>- Explosive Ammo: ${totalExplosiveAmmo}</p>
+        <p><strong>Total ${explosiveType.charAt(0).toUpperCase() + explosiveType.slice(1)} Needed:</strong> ${totalResources}</p>
         <p><strong>Total Sulfur Required:</strong> ${totalSulfur}</p>
       `;
     }
