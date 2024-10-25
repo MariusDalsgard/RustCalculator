@@ -97,6 +97,7 @@
       padding: 15px;
       border-radius: 5px;
       margin-top: 20px;
+      text-align: left;
     }
     .results p {
       margin-bottom: 5px;
@@ -146,51 +147,49 @@
 
   <script>
     function calculateRaid() {
-      // Get quantities for each structure type
-      const woodQty = parseInt(document.getElementById("wood").value) || 0;
-      const stoneQty = parseInt(document.getElementById("stone").value) || 0;
-      const metalQty = parseInt(document.getElementById("metal").value) || 0;
-      const armoredQty = parseInt(document.getElementById("armored").value) || 0;
-
-      const woodDoorQty = parseInt(document.getElementById("woodDoor").value) || 0;
-      const sheetMetalDoorQty = parseInt(document.getElementById("sheetMetalDoor").value) || 0;
-      const garageDoorQty = parseInt(document.getElementById("garageDoor").value) || 0;
-      const armoredDoorQty = parseInt(document.getElementById("armoredDoor").value) || 0;
-
-      const explosiveType = document.getElementById("explosiveType").value;
-      // Raid requirements for each structure
-
-      const requirements = {
-        woodWall: { satchels: 2, c4: 1, rockets: 1, explosiveAmmo: 50 },
-        stoneWall: { satchels: 10, c4: 2, rockets: 2, explosiveAmmo: 200 },
-        metalWall: { satchels: 23, c4: 4, rockets: 4, explosiveAmmo: 400 },
-        armoredWall: { satchels: 46, c4: 8, rockets: 8, explosiveAmmo: 800 },
-        woodDoor: { satchels: 1, c4: 1, rockets: 1, explosiveAmmo: 25 },
-        sheetMetalDoor: { satchels: 4, c4: 1, rockets: 1, explosiveAmmo: 63 },
-        garageDoor: { satchels: 9, c4: 2, rockets: 3, explosiveAmmo: 150 },
-        armoredDoor: { satchels: 12, c4: 2, rockets: 2, explosiveAmmo: 200 }
+      const quantities = {
+        wood: parseInt(document.getElementById("wood").value) || 0,
+        stone: parseInt(document.getElementById("stone").value) || 0,
+        metal: parseInt(document.getElementById("metal").value) || 0,
+        armored: parseInt(document.getElementById("armored").value) || 0,
+        woodDoor: parseInt(document.getElementById("woodDoor").value) || 0,
+        sheetMetalDoor: parseInt(document.getElementById("sheetMetalDoor").value) || 0,
+        garageDoor: parseInt(document.getElementById("garageDoor").value) || 0,
+        armoredDoor: parseInt(document.getElementById("armoredDoor").value) || 0
       };
 
-      // Corrected sulfurCosts keys to match explosiveType values
+      const explosiveType = document.getElementById("explosiveType").value;
+      const requirements = {
+        wood: { satchels: 2, c4: 1, rockets: 2, explosiveAmmo: 50 },
+        stone: { satchels: 10, c4: 2, rockets: 4, explosiveAmmo: 200 },
+        metal: { satchels: 23, c4: 4, rockets: 8, explosiveAmmo: 400 },
+        armored: { satchels: 46, c4: 8, rockets: 16, explosiveAmmo: 800 },
+        woodDoor: { satchels: 1, c4: 1, rockets: 1, explosiveAmmo: 25 },
+        sheetMetalDoor: { satchels: 4, c4: 1, rockets: 2, explosiveAmmo: 63 },
+        garageDoor: { satchels: 9, c4: 2, rockets: 3, explosiveAmmo: 150 },
+        armoredDoor: { satchels: 12, c4: 3, rockets: 5, explosiveAmmo: 200 }
+      };
       const sulfurCosts = { satchels: 480, c4: 2200, rockets: 1400, explosiveAmmo: 15 };
 
-      function calcResources(qty, reqs) {
-        return reqs[explosiveType] * qty;
+      // Separate calculations for walls and doors
+      let wallResources = 0;
+      let doorResources = 0;
+
+      for (let wallType of ["wood", "stone", "metal", "armored"]) {
+        wallResources += quantities[wallType] * (requirements[wallType][explosiveType] || 0);
       }
-      // Calculate resources for each structure
-      const totalResources =
-        calcResources(woodQty, requirements.woodWall) +
-        calcResources(stoneQty, requirements.stoneWall) +
-        calcResources(metalQty, requirements.metalWall) +
-        calcResources(armoredQty, requirements.armoredWall) +
-        calcResources(woodDoorQty, requirements.woodDoor) +
-        calcResources(sheetMetalDoorQty, requirements.sheetMetalDoor) +
-        calcResources(garageDoorQty, requirements.garageDoor) +
-        calcResources(armoredDoorQty, requirements.armoredDoor);
-      // Total resources for all structures
+      for (let doorType of ["woodDoor", "sheetMetalDoor", "garageDoor", "armoredDoor"]) {
+        doorResources += quantities[doorType] * (requirements[doorType][explosiveType] || 0);
+      }
+
+      const totalResources = wallResources + doorResources;
       const totalSulfur = totalResources * sulfurCosts[explosiveType];
 
+      // Display results with separate rows for walls and doors
       document.getElementById("results").innerHTML = `
+        <p><strong>Walls (${explosiveType.charAt(0).toUpperCase() + explosiveType.slice(1)}):</strong> ${wallResources}</p>
+        <p><strong>Doors (${explosiveType.charAt(0).toUpperCase() + explosiveType.slice(1)}):</strong> ${doorResources}</p>
+        <hr>
         <p><strong>Total ${explosiveType.charAt(0).toUpperCase() + explosiveType.slice(1)} Needed:</strong> ${totalResources}</p>
         <p><strong>Total Sulfur Required:</strong> ${totalSulfur}</p>
       `;
