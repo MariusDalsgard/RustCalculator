@@ -20,6 +20,7 @@
       height: 100vh;
       background-color: #1e1e2f;
       color: #f0f0f0;
+      flex-direction: column;
     }
     /* Calculator Container */
     .calculator {
@@ -28,10 +29,10 @@
       border-radius: 8px;
       width: 400px;
       box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      text-align: center;
     }
     /* Header */
     .calculator h2 {
-      text-align: center;
       color: #76c7c0;
       font-size: 1.6em;
       margin-bottom: 20px;
@@ -101,6 +102,12 @@
       margin-bottom: 5px;
       font-size: 0.95em;
     }
+    /* Footer Text */
+    .footer-text {
+      margin-top: 10px;
+      font-size: 0.8em;
+      color: #888;
+    }
   </style>
 </head>
 <body>
@@ -133,6 +140,8 @@
     
     <button onclick="calculateRaid()">Calculate</button>
     <div class="results" id="results"></div>
+    <!-- Footer Text -->
+    <p class="footer-text">Lavet af sigmaen Marius</p>
   </div>
 
   <script>
